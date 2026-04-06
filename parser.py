@@ -116,7 +116,6 @@ def _build_config(pairs: dict[str, str]) -> MazeConfig:
     Raises:
         SystemExit: If any value has an invalid type or fails validation.
     """
-    # ── Width and height ──────────────────────────────────────────────────
     try:
         width  = int(pairs["WIDTH"])
         height = int(pairs["HEIGHT"])
@@ -136,7 +135,6 @@ def _build_config(pairs: dict[str, str]) -> MazeConfig:
         )
         sys.exit(1)
 
-    # ── Entry and exit ────────────────────────────────────────────────────
     entry = _parse_coords(pairs["ENTRY"], "ENTRY")
     exit_ = _parse_coords(pairs["EXIT"],  "EXIT")
 
@@ -153,7 +151,6 @@ def _build_config(pairs: dict[str, str]) -> MazeConfig:
         print("Error: ENTRY and EXIT must be different cells.")
         sys.exit(1)
 
-    # ── Entry/exit must not overlap with the "42" pattern ─────────────────
     pat = pattern_cells(width, height)
     for name, coord in [("ENTRY", entry), ("EXIT", exit_)]:
         if coord in pat:
@@ -163,18 +160,17 @@ def _build_config(pairs: dict[str, str]) -> MazeConfig:
             )
             sys.exit(1)
 
-    # ── Perfect flag ──────────────────────────────────────────────────────
     perfect_raw = pairs["PERFECT"].strip().lower()
     if perfect_raw not in ("true", "false"):
         print(f"Error: PERFECT must be True or False (got '{pairs['PERFECT']}').")
         sys.exit(1)
     perfect = perfect_raw == "true"
 
-    # ── Optional seed ─────────────────────────────────────────────────────
     seed: int | None = None
     if "SEED" in pairs:
         try:
             seed = int(pairs["SEED"])
+            seed = str(seed)
         except ValueError:
             print(f"Error: SEED must be an integer (got '{pairs['SEED']}').")
             sys.exit(1)

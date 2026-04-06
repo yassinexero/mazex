@@ -3,12 +3,10 @@
 
 import sys
 import random
-from mazegen import MazeGenerator # to use gen.grid entry exit...
+from mazegen import MazeGenerator
 
 from mazegen.generator import NORTH, EAST, SOUTH, WEST
-from maze_writer import write_maze # needed ub _regenerate() must update output file
-
-# ANSI colours
+from maze_writer import write_maze
 
 RESET = "\033[0m"
 WALL_COLOURS = {
@@ -21,11 +19,10 @@ WALL_COLOURS = {
     "7": ("red",     "\033[91m"),
 }
 
-# Special colours
-PATH = "\033[96m"   # cyan  — path dot
-ENTRY = "\033[92m"   # green — E marker
-EXIT = "\033[91m"   # red   — X marker
-PAT_BG = "\033[43m\033[30m"  # yellow bg + black text — "42" block
+PATH = "\033[96m"
+ENTRY = "\033[92m"
+EXIT = "\033[91m"
+PAT_BG = "\033[43m\033[30m"
 
 
 class MazeVisual:
@@ -42,10 +39,8 @@ class MazeVisual:
         self.gen = gen
         self.output_file = output_file
         self.show_path = False
-        self.wall_col = "\033[97m"   # default white
+        self.wall_col = "\033[97m"
         self.wall_name = "white"
-
-    # ── Main loop ────────────────────────────────────────────────────────
 
     def run(self) -> None:
         """Start the interactive loop."""
@@ -63,8 +58,6 @@ class MazeVisual:
             elif choice == "4":
                 print("Goodbye!")
                 sys.exit(0)
-
-    # ── Drawing ──────────────────────────────────────────────────────────
 
     def _draw(self) -> None:
         """Render the full maze grid to the terminal."""
@@ -98,7 +91,6 @@ class MazeVisual:
             is_pat = (col, row) in self.gen._pattern_cells
             line += self._vwall(col, row, WEST, is_pat)
             line += self._body(col, row)
-        # rightmost east wall — pass last column index directly
         last = self.gen.width - 1
         is_last_pat = (last, row) in self.gen._pattern_cells
         line += self._vwall(last, row, EAST, is_last_pat)
@@ -115,7 +107,6 @@ class MazeVisual:
         line += self._corner(self.gen.width, row + 1)
         return line
 
-    # ── Cell components ───────────────────────────────────────────────────
 
     def _corner(self, col: int, row: int) -> str:
         """Return a '+' corner, yellow only when surrounded by pattern cells.
@@ -134,7 +125,6 @@ class MazeVisual:
             (col - 1, row - 1), (col, row - 1),
             (col - 1, row),     (col, row),
         ]
-        # Only consider cells that are inside the grid
         inside = [
             (x, y) for (x, y) in touching
             if 0 <= x < self.gen.width and 0 <= y < self.gen.height
@@ -157,7 +147,6 @@ class MazeVisual:
             is_pat:    Whether this cell is a pattern cell.
         """
         has_wall = bool(self.gen.grid[row][col] & direction)
-        # Find the neighbour across this wall
         ny = row - 1 if direction == NORTH else row + 1
         other_pat = (col, ny) in self.gen._pattern_cells
         both_pat = is_pat and other_pat
@@ -183,7 +172,6 @@ class MazeVisual:
             is_pat:    Whether this cell is a pattern cell.
         """
         has_wall = bool(self.gen.grid[row][col] & direction)
-        # Find the neighbour across this wall
         nx = col - 1 if direction == WEST else col + 1
         other_pat = (nx, row) in self.gen._pattern_cells
         both_pat = is_pat and other_pat
@@ -209,7 +197,6 @@ class MazeVisual:
             return PATH + " * " + RESET
         return "   "
 
-    # ── Actions ───────────────────────────────────────────────────────────
 
     def _regenerate(self) -> None:
         """Reset state, generate a new maze, and update the output file."""
@@ -233,7 +220,6 @@ class MazeVisual:
         if choice in WALL_COLOURS:
             self.wall_name, self.wall_col = WALL_COLOURS[choice]
 
-    # ── Helpers ──────────────────────────────────────────────────────────
 
     def _path_cells(self) -> set[tuple[int, int]]:
         """Convert solution string to a set of (x, y) cells on the path."""

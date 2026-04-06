@@ -21,10 +21,8 @@ def main() -> None:
         print("Usage: python3 a_maze_ing.py config.txt")
         sys.exit(1)
 
-    # Step 1 — parse config
     config = parse_config(sys.argv[1])
 
-    # Step 2 — generate maze
     generator = MazeGenerator(
         width=config.width,
         height=config.height,
@@ -35,11 +33,9 @@ def main() -> None:
     )
     generator.generate()
 
-    # Step 3 — write output file
     write_maze(generator, config.output_file)
     print(f"Maze written to '{config.output_file}'.")
 
-    # Step 4 — launch visual
     visual = MazeVisual(generator, config.output_file)
     visual.run()
 
