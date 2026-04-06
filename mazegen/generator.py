@@ -56,9 +56,9 @@ PATTERN_42: list[list[int]] = [
 ]
 
 PATTERN_HEIGHT: int = len(PATTERN_42)
-PATTERN_WIDTH:  int = len(PATTERN_42[0])
+PATTERN_WIDTH: int = len(PATTERN_42[0])
 
-MIN_MAZE_WIDTH:  int = PATTERN_WIDTH  + 2
+MIN_MAZE_WIDTH: int = PATTERN_WIDTH + 2
 MIN_MAZE_HEIGHT: int = PATTERN_HEIGHT + 2
 
 
@@ -74,7 +74,7 @@ def pattern_cells(maze_width: int, maze_height: int) -> set[tuple[int, int]]:
     Returns:
         Set of (x, y) coordinates that belong to the '42' pattern.
     """
-    origin_x = (maze_width  - PATTERN_WIDTH)  // 2
+    origin_x = (maze_width - PATTERN_WIDTH) // 2
     origin_y = (maze_height - PATTERN_HEIGHT) // 2
     cells: set[tuple[int, int]] = set()
     for row_idx, row in enumerate(PATTERN_42):
@@ -110,7 +110,7 @@ class MazeGenerator:
         entry:   tuple[int, int],
         exit_:   tuple[int, int],
         perfect: bool = True,
-        seed:    int | None = None,
+        seed:    str | None = None,
     ) -> None:
         """Initialize the MazeGenerator.
 
@@ -134,7 +134,6 @@ class MazeGenerator:
         self._visited: list[list[bool]] = []
         self._pattern_cells: set[tuple[int, int]] = set()
 
-
     def generate(self) -> None:
         """Generate the maze.
 
@@ -156,7 +155,6 @@ class MazeGenerator:
         self._fix_open_areas()
         self.solution = self._bfs_solve()
 
-
     def _init_grid(self) -> None:
         """Initialize the grid with all walls closed and visited map False."""
         self.grid = [
@@ -165,7 +163,6 @@ class MazeGenerator:
         self._visited = [
             [False] * self.width for _ in range(self.height)
         ]
-
 
     def _reserve_pattern(self) -> None:
         """Reserve "42" pattern cells before DFS runs.
@@ -177,7 +174,6 @@ class MazeGenerator:
         for gx, gy in self._pattern_cells:
             self._visited[gy][gx] = True
             self.grid[gy][gx] = ALL_WALLS
-
 
     def _dfs(self, start_x: int, start_y: int) -> None:
         """Run iterative DFS from the given start cell to carve passages.
@@ -210,7 +206,6 @@ class MazeGenerator:
             if not moved:
                 stack.pop()
 
-
     def _add_extra_passages(self, density: float = 0.2) -> None:
         """Add random extra passages to create loops in non-perfect mode.
 
@@ -240,7 +235,6 @@ class MazeGenerator:
                         self.grid[y][x] &= ~wall_cur
                         self.grid[ny][nx] &= ~wall_nbr
 
-
     def _is_open_area(self, x: int, y: int) -> bool:
         """Return True if the 3×3 block at (x, y) has no interior walls."""
         for row in range(y, y + 3):
@@ -262,10 +256,8 @@ class MazeGenerator:
                             self.grid[cy][cx] |= SOUTH
                             self.grid[cy + 1][cx] |= NORTH
 
-
     def _bfs_solve(self) -> str:
         """Find the shortest path from entry to exit using BFS.
-
         Returns:
             A string of N/E/S/W direction letters (shortest path),
             or an empty string if no path exists.
