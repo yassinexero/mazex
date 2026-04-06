@@ -26,16 +26,13 @@ Example usage:
 import random
 from collections import deque
 
-# ── Wall bit masks ────────────────────────────────────────────────────────────
-NORTH: int = 0b0001  # bit 0
-EAST:  int = 0b0010  # bit 1
-SOUTH: int = 0b0100  # bit 2
-WEST:  int = 0b1000  # bit 3
+NORTH: int = 0b0001
+EAST:  int = 0b0010
+SOUTH: int = 0b0100
+WEST:  int = 0b1000
 
-ALL_WALLS: int = NORTH | EAST | SOUTH | WEST  # 0xF
+ALL_WALLS: int = NORTH | EAST | SOUTH | WEST
 
-# ── Directions ────────────────────────────────────────────────────────────────
-# Each tuple: (dx, dy, wall on current cell, wall on neighbor)
 DIRECTIONS: list[tuple[int, int, int, int]] = [
     (0, -1, NORTH, SOUTH),
     (1,  0, EAST,  WEST),
@@ -43,7 +40,6 @@ DIRECTIONS: list[tuple[int, int, int, int]] = [
     (-1, 0, WEST,  EAST),
 ]
 
-# Maps movement vector → direction letter (used in BFS path reconstruction)
 DIR_LETTER: dict[tuple[int, int], str] = {
     (0, -1): "N",
     (1,  0): "E",
@@ -51,18 +47,6 @@ DIR_LETTER: dict[tuple[int, int], str] = {
     (-1, 0): "W",
 }
 
-# ── "42" pixel pattern ────────────────────────────────────────────────────────
-# 7 rows x 9 cols. 1 = solid walled cell, 0 = normal cell DFS can carve.
-# Col 4 (all zeros) is the gap between the "4" and the "2".
-#
-#   4   4  .  2222
-#   4   4  .  2  2
-#   4   4  .     2
-#   44444  .  2222
-#       4  .  2
-#       4  .  2
-#       4  .  2222
-#
 PATTERN_42: list[list[int]] = [
     [1, 0, 1,  0,  1, 1, 1],
     [1, 0, 1,  0,  0, 0, 1],
@@ -71,12 +55,11 @@ PATTERN_42: list[list[int]] = [
     [0, 0, 1,  0,  1, 1, 1],
 ]
 
-PATTERN_HEIGHT: int = len(PATTERN_42)      # 5
-PATTERN_WIDTH:  int = len(PATTERN_42[0])   # 7
+PATTERN_HEIGHT: int = len(PATTERN_42)
+PATTERN_WIDTH:  int = len(PATTERN_42[0])
 
-# Minimum maze size to fit the pattern with 2-cell buffer on each side
-MIN_MAZE_WIDTH:  int = PATTERN_WIDTH  + 2  # 9
-MIN_MAZE_HEIGHT: int = PATTERN_HEIGHT + 2  # 7
+MIN_MAZE_WIDTH:  int = PATTERN_WIDTH  + 2
+MIN_MAZE_HEIGHT: int = PATTERN_HEIGHT + 2
 
 
 def pattern_cells(maze_width: int, maze_height: int) -> set[tuple[int, int]]:
@@ -151,7 +134,6 @@ class MazeGenerator:
         self._visited: list[list[bool]] = []
         self._pattern_cells: set[tuple[int, int]] = set()
 
-    # ── Public API ─────────────────────────────────────────────────────────
 
     def generate(self) -> None:
         """Generate the maze.
@@ -174,7 +156,6 @@ class MazeGenerator:
         self._fix_open_areas()
         self.solution = self._bfs_solve()
 
-    # ── Grid initialization ────────────────────────────────────────────────
 
     def _init_grid(self) -> None:
         """Initialize the grid with all walls closed and visited map False."""
@@ -185,7 +166,6 @@ class MazeGenerator:
             [False] * self.width for _ in range(self.height)
         ]
 
-    # ── "42" pattern reservation ───────────────────────────────────────────
 
     def _reserve_pattern(self) -> None:
         """Reserve "42" pattern cells before DFS runs.
@@ -198,7 +178,6 @@ class MazeGenerator:
             self._visited[gy][gx] = True
             self.grid[gy][gx] = ALL_WALLS
 
-    # ── DFS ────────────────────────────────────────────────────────────────
 
     def _dfs(self, start_x: int, start_y: int) -> None:
         """Run iterative DFS from the given start cell to carve passages.
@@ -231,7 +210,6 @@ class MazeGenerator:
             if not moved:
                 stack.pop()
 
-    # ── Non-perfect mode: extra passages ───────────────────────────────────
 
     def _add_extra_passages(self, density: float = 0.2) -> None:
         """Add random extra passages to create loops in non-perfect mode.
@@ -262,7 +240,6 @@ class MazeGenerator:
                         self.grid[y][x] &= ~wall_cur
                         self.grid[ny][nx] &= ~wall_nbr
 
-    # ── 3×3 open area fix ─────────────────────────────────────────────────
 
     def _is_open_area(self, x: int, y: int) -> bool:
         """Return True if the 3×3 block at (x, y) has no interior walls."""
@@ -285,7 +262,6 @@ class MazeGenerator:
                             self.grid[cy][cx] |= SOUTH
                             self.grid[cy + 1][cx] |= NORTH
 
-    # ── BFS solver ────────────────────────────────────────────────────────
 
     def _bfs_solve(self) -> str:
         """Find the shortest path from entry to exit using BFS.
@@ -318,19 +294,19 @@ class MazeGenerator:
                 came_from[(nx, ny)] = ((x, y), DIR_LETTER[(dx, dy)])
                 queue.append((nx, ny))
 
-        # Reconstruct path by walking came_from backwards
         if goal not in came_from:
             return ""
         path: list[str] = []
         current: tuple[int, int] = goal
-        while came_from[current] is not None:
-            prev, letter = came_from[current]  # type: ignore[misc]
+        while True:
+            step = came_from[current]
+            if step is None:
+                break
+            prev, letter = step
             path.append(letter)
             current = prev
         path.reverse()
         return "".join(path)
-
-    # ── Helper ─────────────────────────────────────────────────────────────
 
     def _in_bounds(self, x: int, y: int) -> bool:
         """Return True if (x, y) is inside the maze grid.
