@@ -2,7 +2,6 @@
 
 
 import sys
-import random
 from mazegen import MazeGenerator
 
 from mazegen.generator import NORTH, EAST, SOUTH, WEST
@@ -107,7 +106,6 @@ class MazeVisual:
         line += self._corner(self.gen.width, row + 1)
         return line
 
-
     def _corner(self, col: int, row: int) -> str:
         """Return a '+' corner, yellow only when surrounded by pattern cells.
 
@@ -197,10 +195,9 @@ class MazeVisual:
             return PATH + " * " + RESET
         return "   "
 
-
     def _regenerate(self) -> None:
         """Reset state, generate a new maze, and update the output file."""
-        self.gen.seed = random.randint(0, 99999)
+        self.gen.seed = None
         self.gen.grid = []
         self.gen.solution = ""
         self.gen._visited = []
@@ -219,7 +216,6 @@ class MazeVisual:
         choice = input("Pick (1-7): ").strip()
         if choice in WALL_COLOURS:
             self.wall_name, self.wall_col = WALL_COLOURS[choice]
-
 
     def _path_cells(self) -> set[tuple[int, int]]:
         """Convert solution string to a set of (x, y) cells on the path."""

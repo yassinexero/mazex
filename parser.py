@@ -29,7 +29,7 @@ class MazeConfig:
     exit:        tuple[int, int]
     output_file: str
     perfect:     bool
-    seed:        int | None = None
+    seed:        str | None = None
 
 
 def _parse_coords(value: str, key: str) -> tuple[int, int]:
@@ -74,7 +74,8 @@ def _parse_pairs(lines: list[str]) -> dict[str, str]:
         if not stripped or stripped.startswith("#"):
             continue
         if "=" not in stripped:
-            print(f"Error: Line {i} is not a valid KEY=VALUE pair: '{stripped}'")
+            print(f"Error: Line {i} is not a valid "
+                  f"KEY=VALUE pair: '{stripped}'")
             sys.exit(1)
         key, _, value = stripped.partition("=")
         pairs[key.strip().upper()] = value.strip()
@@ -98,7 +99,8 @@ def _validate_pairs(pairs: dict[str, str]) -> None:
         sys.exit(1)
     missing = MANDATORY_KEYS - pairs.keys()
     if missing:
-        print(f"Error: Missing mandatory config keys: {', '.join(sorted(missing))}")
+        print(f"Error: Missing mandatory config keys: "
+              f"{', '.join(sorted(missing))}")
         sys.exit(1)
 
 
@@ -117,7 +119,7 @@ def _build_config(pairs: dict[str, str]) -> MazeConfig:
         SystemExit: If any value has an invalid type or fails validation.
     """
     try:
-        width  = int(pairs["WIDTH"])
+        width = int(pairs["WIDTH"])
         height = int(pairs["HEIGHT"])
     except ValueError:
         print("Error: WIDTH and HEIGHT must be integers.")
@@ -162,15 +164,15 @@ def _build_config(pairs: dict[str, str]) -> MazeConfig:
 
     perfect_raw = pairs["PERFECT"].strip().lower()
     if perfect_raw not in ("true", "false"):
-        print(f"Error: PERFECT must be True or False (got '{pairs['PERFECT']}').")
+        print(f"Error: PERFECT must be True or False "
+              f"(got '{pairs['PERFECT']}').")
         sys.exit(1)
     perfect = perfect_raw == "true"
 
-    seed: int | None = None
+    seed: str | None = None
     if "SEED" in pairs:
         try:
-            seed = int(pairs["SEED"])
-            seed = str(seed)
+            seed = pairs["SEED"]
         except ValueError:
             print(f"Error: SEED must be an integer (got '{pairs['SEED']}').")
             sys.exit(1)
